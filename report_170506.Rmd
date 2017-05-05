@@ -1,0 +1,78 @@
+---
+title: "近十年國內糧食供需"
+author: "Chiu-Wang Tseng"
+date: "2017年5月4日"
+output: html_document
+---
+## 資料來源：農委會糧食供需年報
+
+##　－－－－－
+## 近十年的糧食供需情況
+
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+library(plotly)
+data = read.table(file='./cereals_data.txt', header=T)
+need = data$produce + data$import - data$export
+sell_in = data$produce - data$export
+
+# all data - import vs need
+p1 = plot_ly(data, x = ~year, y = ~produce, name = '國內產量', type = 'scatter', mode = 'lines+markers') %>%
+        add_trace(y = ~import, name = '進口量', mode = 'lines+markers') %>%
+        add_trace(y = ~export, name = '出口量', mode = 'lines+markers') %>%
+        add_trace(y = need, name = '糧食需求量', mode = 'lines+markers') %>%
+        layout(title = "近十年糧食供需",
+               xaxis = list(title = "民國年"),
+               yaxis = list(title = "公噸"))
+p1
+
+htmlwidgets::saveWidget(p1, "index1.html")
+```
+
+    上圖為國內近十年的糧食供需情形。由圖中可以看到，國內的糧食需求大多仰賴進口穀物，基本上糧食需求量會隨著進口量的波動而產生變化。整體而言，國內的糧食供需情形沒有太大的變動情形。以下將進一步分別針對國內生產量、出口量及內銷量做進一步探討。
+    
+## 國內產量
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+# 國內產量逐年上升
+p2 = plot_ly(data, x = ~year, y = ~produce, name = '國內產量', type = 'scatter', mode = 'markers') %>%
+        add_trace(y = fitted(lm(data$produce ~ data$year)), name = '趨勢線', type = 'scatter', mode = 'lines')  %>%
+        layout(title = "國內生產量趨勢",
+               xaxis = list(title = "民國年"),
+               yaxis = list(title = "公噸")) 
+p2
+
+htmlwidgets::saveWidget(p2, "index2.html")
+```
+   
+    將尺度拉近，觀察一下國內生產量的情況，並加上趨勢線後，可以發現國內糧食生產量隨著年份呈現上升的趨勢。推論可能是因為農耕技術的進步而產生的現象。
+   
+## 出口量
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+# 出口量上升
+p3 = plot_ly(data, x = ~year, y = ~export, name = '出口量', type = 'scatter', mode = 'markers') %>%
+        add_trace(y = fitted(lm(data$export ~ data$year)), name = '趨勢線', type = 'scatter', mode = 'lines') %>%
+        layout(title = "出口量趨勢",
+               xaxis = list(title = "民國年"),
+               yaxis = list(title = "公噸"))
+p3
+
+htmlwidgets::saveWidget(p3, "index3.html")
+``` 
+    
+    接著觀察出口量的變化情形。由出口量的趨勢圖中我們可以發現亦為逐年上升。因為國內生產量的增加，出口量上升的情況是可以預期的。
+
+## 內銷量
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+# 內銷量上升趨勢不明顯
+p4 = plot_ly(data, x = ~year, y = sell_in, name = '內銷量', type = 'scatter', mode = 'markers') %>%
+  add_trace(y = fitted(lm(sell_in ~ data$year)), name = '趨勢線', type = 'scatter', mode = 'lines') %>%
+        layout(title = "內銷量趨勢",
+               xaxis = list(title = "民國年"),
+               yaxis = list(title = "公噸"))
+p4
+
+htmlwidgets::saveWidget(p4, "index4.html")
+```
+
+    最後將生產量和出口量的數值相減，我們可以得到內銷量的數值。將內銷量的情形做圖後，可以發現雖然趨勢線的斜率為正，但由於資料的亂度過大，因此應該是沒有足夠證據能顯示內銷量逐年上升。由此情形我們可以推論，雖然國內糧食生產量提高，但內銷的情形已經趨近飽合，因此大部份都轉向出口。由此可見，政府在推銷在地生產糧食的方面還有進步的空間。
